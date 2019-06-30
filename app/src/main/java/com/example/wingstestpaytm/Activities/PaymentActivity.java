@@ -60,7 +60,7 @@ public class PaymentActivity extends AppCompatActivity implements PaytmPaymentTr
 
         Log.d(TAG, "onCreate: Payment: " + orderId + " " + custid);
 
-        final CardInputWidget mCardInputWidget = findViewById(R.id.card_input_widget);
+//        final CardInputWidget mCardInputWidget = findViewById(R.id.card_input_widget);
         buttonPlaceOrder = findViewById(R.id.button_place_order);
         buttonPlaceOrder.setOnClickListener(new View.OnClickListener() {
             @Override
