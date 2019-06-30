@@ -10,4 +10,14 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+
+
+    <string name="error">Chotto Matte!</string>
+    <string name="msg_unknown">Message Unknown</string>
+    <string name="existing_order_error">Your previous order is awaiting confirmation. Once it is confirmed, you can order again.</string>
+
+
+
+
 </resources>
