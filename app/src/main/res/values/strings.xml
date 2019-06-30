@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Wings</string>
+    <string name="facebook_app_id">341678839888568</string>
+    <string name="fb_login_protocol_scheme">fb341678839888568</string>
+
+    <string name="API_URL">http://46.101.192.46/api</string>
+    <string name="CLIENT_ID">573UAjjR69iYkXO07Hj17fRvIy3sJFjSZ8RUH21g</string>
+    <string name="CLIENT_SECRET">eaeveIpaUQvo9sBecHEmlzj7VA6ZF40Nw202zfsPYLdAEEi9JGI2yBV1C3Y2TjvMqlRdK8Kd2RxtgRAPT67g73wjYXtrJtw25XXw5cLRI2fNAzs5VdlVUBByPwqY19eg</string>
+    <string name="title_activity_customer_main">CustomerMainActivity</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
