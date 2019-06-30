@@ -5,11 +5,16 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.wingstestpaytm.Adapters.MealAdapter;
 import com.example.wingstestpaytm.ApiService;
 import com.example.wingstestpaytm.ApiServiceBuilder;
+import com.example.wingstestpaytm.JsonModelObject.Registration;
 import com.example.wingstestpaytm.Objects.MealModel;
 import com.example.wingstestpaytm.R;
 
@@ -24,6 +29,7 @@ public class MealListActivity extends AppCompatActivity {
     private ArrayList<MealModel> mealArrayList;
     private RecyclerView recyclerView;
     private MealAdapter mealAdapter;
+    private MealModel[] listArr = new MealModel[]{};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +45,7 @@ public class MealListActivity extends AppCompatActivity {
         mealArrayList = new ArrayList<>();
         mealAdapter = new MealAdapter(mealArrayList, this, restaurantId);
 
-        recyclerView =  findViewById(R.id.meal_list);
+        recyclerView = findViewById(R.id.meal_list);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
 
@@ -51,6 +57,9 @@ public class MealListActivity extends AppCompatActivity {
 
 
         getMeals(restaurantId);
+        addSearchFunction();
+
+
     }
 
     private void getMeals(String restaurantId) {
@@ -65,8 +74,13 @@ public class MealListActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<MealModel> call, Response<MealModel> response) {
                 //What happens when we get a reponse from our server
-                for (int i = 0; i < response.body().getMealList().size(); i++)
+                for (int i = 0; i < response.body().getMealList().size(); i++) {
+
                     mealArrayList.add(response.body().getMealList().get(i));
+                }
+
+                listArr = new MealModel[mealArrayList.size()];
+                listArr = mealArrayList.toArray(listArr);
                 mealAdapter.notifyDataSetChanged();
             }
 
@@ -77,5 +91,40 @@ public class MealListActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+
+    private void addSearchFunction() {
+
+        EditText searchInput = findViewById(R.id.events_search);
+
+        searchInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+
+                Log.d("SEARCH", charSequence.toString());
+
+                mealArrayList.clear();
+
+                for (MealModel m : listArr) {
+                    if (m.getName().toLowerCase().contains(charSequence.toString().toLowerCase())) {
+
+                        mealArrayList.add(m);
+
+                    }
+                }
+                mealAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
     }
 }
