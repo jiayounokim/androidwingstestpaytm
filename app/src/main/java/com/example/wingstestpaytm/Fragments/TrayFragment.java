@@ -162,11 +162,8 @@ public class TrayFragment extends Fragment implements OnMapReadyCallback {
                                     ViewGroup.LayoutParams.WRAP_CONTENT, 1));
 
                     LinearLayout linearLayout = getActivity().findViewById(R.id.tray_layout);
-
-                    //linearLayout.removeAllViews();
-
-                    ///this is for testing paytm.
-                    //linearLayout.addView(alertText);
+                    linearLayout.removeAllViews();
+                    linearLayout.addView(alertText);
 
 
                 }
