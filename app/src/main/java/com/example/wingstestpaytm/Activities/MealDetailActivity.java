@@ -78,6 +78,7 @@ public class MealDetailActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (BUTTON_SKIPPED) {
                     Toast.makeText(MealDetailActivity.this, "Login is required for add to cart", Toast.LENGTH_SHORT).show();
+                    handleLoginRequired();
                 } else {
                     BUTTON_SKIPPED = false;
                     int qty = Integer.parseInt(labelQuantity.getText().toString());
@@ -123,6 +124,7 @@ public class MealDetailActivity extends AppCompatActivity {
         if (R.id.tray_button == id) {
             if (BUTTON_SKIPPED) {
                 Toast.makeText(this, "Login is required onOptionItemSelected", Toast.LENGTH_SHORT).show();
+                handleLoginRequired();
             } else {
                 BUTTON_SKIPPED = false;
                 Intent intent = new Intent(getApplicationContext(), CustomerMainActivity.class);
@@ -215,5 +217,21 @@ public class MealDetailActivity extends AppCompatActivity {
                 }
             }
         }.execute();
+    }
+
+    private void handleLoginRequired(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(MealDetailActivity.this);
+        builder.setTitle("Start New Tray?");
+        builder.setMessage("You are ordering meal from another restaurant. Would you like to clean the current tray?");
+        builder.setPositiveButton("Cancel", null);
+        builder.setNegativeButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent loginIntent = new Intent(MealDetailActivity.this, SignInActivity.class);
+                startActivity(loginIntent);
+            }
+        });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
     }
 }
