@@ -22,55 +22,45 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-public class MealDetailActivity extends AppCompatActivity {
+import static com.example.wingstestpaytm.Activities.SignInActivity.BUTTON_SKIPPED;
 
+public class MealDetailActivity extends AppCompatActivity {
     private AppDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_meal_detail);
-
         Intent intent = getIntent();
         final String restaurantId = intent.getStringExtra("restaurantId");
         final String mealId = intent.getStringExtra("mealId");
         final String mealName = intent.getStringExtra("mealName");
         String mealDescription = intent.getStringExtra("mealDescription");
         final Float mealPrice = intent.getFloatExtra("mealPrice", 0);
-        Toast.makeText(this, "mealprice float MealDetailAct "+ String.valueOf(mealPrice), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "mealprice float MealDetailAct " + String.valueOf(mealPrice), Toast.LENGTH_SHORT).show();
         String mealImage = intent.getStringExtra("mealImage");
-
-
         getSupportActionBar().setTitle(mealName);
-
         TextView name = findViewById(R.id.meal_name);
         TextView desc = findViewById(R.id.meal_desc);
         final TextView price = findViewById(R.id.meal_price_detail);
         ImageView image = findViewById(R.id.meal_image);
-
         name.setText(mealName);
         desc.setText(mealDescription);
         price.setText("Rs." + mealPrice);
         Picasso.with(getApplicationContext()).load(mealImage).fit().centerInside().into(image);
-
         final TextView labelQuantity = findViewById(R.id.label_quantity);
         Button buttonIncrease = findViewById(R.id.button_increase);
         Button buttonDecrease = findViewById(R.id.button_decrease);
         Button buttonTray = findViewById(R.id.button_add_tray);
-
         buttonIncrease.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 int qty = Integer.parseInt(labelQuantity.getText().toString());
-
                 qty = qty + 1;
                 labelQuantity.setText(qty + "");
                 price.setText("Rs." + (qty * mealPrice));
-
             }
         });
-
-
         buttonDecrease.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -82,14 +72,17 @@ public class MealDetailActivity extends AppCompatActivity {
                 }
             }
         });
-
         db = AppDatabase.getAppDatabase(this);
-
         buttonTray.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int qty = Integer.parseInt(labelQuantity.getText().toString());
-                validateTray(mealId, mealName, mealPrice, qty, restaurantId);
+                if (BUTTON_SKIPPED) {
+                    Toast.makeText(MealDetailActivity.this, "Login is required for add to cart", Toast.LENGTH_SHORT).show();
+                } else {
+                    BUTTON_SKIPPED = false;
+                    int qty = Integer.parseInt(labelQuantity.getText().toString());
+                    validateTray(mealId, mealName, mealPrice, qty, restaurantId);
+                }
             }
         });
     }
@@ -102,7 +95,6 @@ public class MealDetailActivity extends AppCompatActivity {
 
     @SuppressLint("StaticFieldLeak")
     private void insertTray(final String mealId, final String mealName, final float mealPrice, final int mealQty, final String restaurantId) {
-
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
@@ -112,9 +104,7 @@ public class MealDetailActivity extends AppCompatActivity {
                 tray.setMealPrice(mealPrice);
                 tray.setMealQuantity(mealQty);
                 tray.setRestaurantId(restaurantId);
-
                 db.trayDao().insertAll(tray);
-
                 return null;
             }
 
@@ -129,24 +119,24 @@ public class MealDetailActivity extends AppCompatActivity {
     @SuppressLint("StaticFieldLeak")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         int id = item.getItemId();
-
         if (R.id.tray_button == id) {
+            if (BUTTON_SKIPPED) {
+                Toast.makeText(this, "Login is required onOptionItemSelected", Toast.LENGTH_SHORT).show();
+            } else {
+                BUTTON_SKIPPED = false;
+                Intent intent = new Intent(getApplicationContext(), CustomerMainActivity.class);
+                intent.putExtra("screen", "tray");
+                startActivity(intent);
+            }
 
-            Intent intent = new Intent(getApplicationContext(), CustomerMainActivity.class);
-            intent.putExtra("screen", "tray");
-            startActivity(intent);
         }
-
         return super.onOptionsItemSelected(item);
     }
 
     @SuppressLint("StaticFieldLeak")
     public void deleteTray() {
-
         new AsyncTask<Void, Void, Void>() {
-
             @Override
             protected Void doInBackground(Void... voids) {
                 db.trayDao().deleteAll();
@@ -157,7 +147,6 @@ public class MealDetailActivity extends AppCompatActivity {
 
     @SuppressLint("StaticFieldLeak")
     public void updateTray(final int trayId, final int mealQty) {
-
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
@@ -175,36 +164,26 @@ public class MealDetailActivity extends AppCompatActivity {
 
     @SuppressLint("StaticFieldLeak")
     public void validateTray(final String mealId, final String mealName, final float mealPrice, final int mealQuantity, final String restaurantId) {
-
         new AsyncTask<Void, Void, String>() {
-
             @Override
             protected String doInBackground(Void... voids) {
-
                 List<Tray> allTray = db.trayDao().getAll();
                 if (allTray.isEmpty() || allTray.get(0).getRestaurantId().equals(restaurantId)) {
-
                     Tray tray = db.trayDao().getTray(mealId);
                     if (tray == null) {
-
                         return "NOT_EXIST";
                     } else {
                         return tray.getId() + "";
                     }
-
                 } else {
-
                     return "DIFFERENT_RESTAURANT";
                 }
-
             }
 
             @Override
             protected void onPostExecute(final String result) {
                 super.onPostExecute(result);
-
                 if (result.equals("DIFFERENT_RESTAURANT")) {
-
                     AlertDialog.Builder builder = new AlertDialog.Builder(MealDetailActivity.this);
                     builder.setTitle("Start New Tray?");
                     builder.setMessage("You are ordering meal from another restaurant. Would you like to clean the current tray?");
@@ -216,16 +195,11 @@ public class MealDetailActivity extends AppCompatActivity {
                             insertTray(mealId, mealName, mealPrice, mealQuantity, restaurantId);
                         }
                     });
-
                     AlertDialog alertDialog = builder.create();
                     alertDialog.show();
-
                 } else if (result.equals("NOT_EXIST")) {
-
                     insertTray(mealId, mealName, mealPrice, mealQuantity, restaurantId);
-
                 } else {
-
                     AlertDialog.Builder builder = new AlertDialog.Builder(MealDetailActivity.this);
                     builder.setTitle("Add More?");
                     builder.setMessage("Your tray already has this meal. Do you want to add more?");
@@ -236,11 +210,9 @@ public class MealDetailActivity extends AppCompatActivity {
                             updateTray(Integer.parseInt(result), mealQuantity);
                         }
                     });
-
                     AlertDialog alertDialog = builder.create();
                     alertDialog.show();
                 }
-
             }
         }.execute();
     }
