@@ -3,7 +3,6 @@ package com.example.wingstestpaytm.Activities;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -50,31 +49,7 @@ public class SignInActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
 
-        customerButton = findViewById(R.id.button_customer);
-        driverButton = findViewById(R.id.button_driver);
-
-        customerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                customerButton.setBackgroundColor(getResources().getColor(R.color.colorAccent));
-                customerButton.setTextColor(getResources().getColor(android.R.color.white));
-
-                driverButton.setBackgroundColor(getResources().getColor(android.R.color.white));
-                driverButton.setTextColor(getResources().getColor(R.color.colorAccent));
-            }
-        });
-
-        driverButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                driverButton.setBackgroundColor(getResources().getColor(R.color.colorAccent));
-                driverButton.setTextColor(getResources().getColor(android.R.color.white));
-
-                customerButton.setBackgroundColor(getResources().getColor(android.R.color.white));
-                customerButton.setTextColor(getResources().getColor(R.color.colorAccent));
-            }
-        });
-
+ 
         buttonLogin = findViewById(R.id.button_login);
         buttonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,31 +59,16 @@ public class SignInActivity extends AppCompatActivity {
                     LoginManager.getInstance().logInWithReadPermissions(SignInActivity.this, Arrays.asList("public_profile", "email"));
 
                 } else {
-                    ColorDrawable customerbuttonColor = (ColorDrawable) customerButton.getBackground();
-                    if (customerbuttonColor.getColor() == getResources().getColor(R.color.colorAccent)) {
-
-                        loginToServer(AccessToken.getCurrentAccessToken().getToken(), "customer");
-
-
-                    } else {
-
-                        loginToServer(AccessToken.getCurrentAccessToken().getToken(), "driver");
-
-                    }
+                    loginToServer(AccessToken.getCurrentAccessToken().getToken(), "customer");
                 }
             }
         });
 
-
         callbackManager = CallbackManager.Factory.create();
         sharedPref = getSharedPreferences("MY_KEY", Context.MODE_PRIVATE);
 
-
         final Button buttonLogout = findViewById(R.id.button_logout);
-
         buttonLogout.setVisibility(View.GONE);
-
-
         LoginManager.getInstance().registerCallback(callbackManager,
                 new FacebookCallback<LoginResult>() {
                     @Override
@@ -144,20 +104,7 @@ public class SignInActivity extends AppCompatActivity {
                         parameters.putString("fields", "id,name,email,picture");
                         request.setParameters(parameters);
                         request.executeAsync();
-
-
-                        ColorDrawable customerbuttonColor = (ColorDrawable) customerButton.getBackground();
-                        if (customerbuttonColor.getColor() == getResources().getColor(R.color.colorAccent)) {
-
-                            loginToServer(AccessToken.getCurrentAccessToken().getToken(), "customer");
-
-
-                        } else {
-
-                            loginToServer(AccessToken.getCurrentAccessToken().getToken(), "driver");
-
-                        }
-
+                        loginToServer(AccessToken.getCurrentAccessToken().getToken(), "customer");
                     }
 
                     @Override
@@ -243,15 +190,9 @@ public class SignInActivity extends AppCompatActivity {
 
                 editor.commit();
 
-                if (userType.equals("customer")) {
+                Intent intent = new Intent(getApplicationContext(), CustomerMainActivity.class);
+                startActivity(intent);
 
-                    Intent intent = new Intent(getApplicationContext(), CustomerMainActivity.class);
-                    startActivity(intent);
-                } else {
-
-                    Intent intent = new Intent(getApplicationContext(), DriverMainActivity.class);
-                    startActivity(intent);
-                }
             }
 
             @Override
