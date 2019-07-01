@@ -1,5 +1,6 @@
 package com.example.wingstestpaytm.Activities;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,6 +14,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -34,79 +36,70 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static com.example.wingstestpaytm.Activities.SignInActivity.BUTTON_SKIPPED;
+
 public class CustomerMainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
-
     private DrawerLayout mDrawerLayout;
-
     private ActionBarDrawerToggle mToggle;
-
     private SharedPreferences sharedPref;
-
-
     NavigationView navigationView;
     String screen;
     Intent intent;
+    private static final String TAG = "lgx_CustomerMainActivity";
+    private ImageView customer_avatar;
+    private TextView customer_name;
 
+    @SuppressLint("LongLogTag")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_customer_main);
-
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionbar = getSupportActionBar();
         actionbar.setDisplayHomeAsUpEnabled(true);
         actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-
         mDrawerLayout = findViewById(R.id.drawer_layout);
         mToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.app_name, R.string.app_name);
         mDrawerLayout.addDrawerListener(mToggle);
         mToggle.syncState();
-
-
         navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
         intent = getIntent();
         screen = intent.getStringExtra("screen");
-
         Toast.makeText(this, "onStart " + screen, Toast.LENGTH_SHORT).show();
-
         if (Objects.equals(screen, "tray")) {
-
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
             transaction.replace(R.id.content_frame, new TrayFragment()).commit();
-
         } else if (Objects.equals(screen, "order")) {
-
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
             transaction.replace(R.id.content_frame, new OrderFragment()).commit();
-
         } else {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
             transaction.replace(R.id.content_frame, new RestaurantListFragment()).commit();
         }
-
-
         sharedPref = getSharedPreferences("MY_KEY", Context.MODE_PRIVATE);
-
         View header = navigationView.getHeaderView(0);
-        ImageView customer_avatar = (ImageView) header.findViewById(R.id.customer_avatar);
-        TextView customer_name = header.findViewById(R.id.customer_name);
-
-        customer_name.setText(sharedPref.getString("name", ""));
-        Picasso.with(this).load(sharedPref.getString("avatar", "")).transform(new CircleTransform()).into(customer_avatar);
-
+        customer_avatar = (ImageView) header.findViewById(R.id.customer_avatar);
+        customer_name = header.findViewById(R.id.customer_name);
+        if (SignInActivity.BUTTON_SKIPPED) {
+            Log.d(TAG, "BUTTON SKIPPED");
+            customer_name.setText("Guest name");
+            customer_avatar.setBackgroundResource(R.drawable.button_tray);
+            BUTTON_SKIPPED = false;
+        } else {
+            Log.d(TAG, "BUTTON NOT SKIPPED");
+            customer_name.setText(sharedPref.getString("name", ""));
+            Picasso.with(this).load(sharedPref.getString("avatar", "")).transform(new CircleTransform()).into(customer_avatar);
+        }
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
-
         switch (item.getItemId()) {
             case android.R.id.home:
                 mDrawerLayout.openDrawer(GravityCompat.START);
@@ -123,33 +116,26 @@ public class CustomerMainActivity extends AppCompatActivity implements Navigatio
         }
     }
 
+    @SuppressLint("LongLogTag")
     private void logoutToServer(final String token) {
-
+        Log.d(TAG, "logoutToServer: inside logoutToServer " + token);
         ApiService service = ApiServiceBuilder.getService();
-
         Call<Void> call = service.getToken(token, getString(R.string.CLIENT_ID), getString(R.string.CLIENT_SECRET));
         call.enqueue(new Callback<Void>() {
-
-
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
+                Log.d(TAG, "onResponse: logoutToServer " + response.body());
                 if (response.isSuccessful()) {
-
-
                     Toast.makeText(CustomerMainActivity.this, "CUSTOMER SUCCESS RESPONSE RETROFIT " + response.code(), Toast.LENGTH_SHORT).show();
-
                 }
-
                 Toast.makeText(CustomerMainActivity.this, "CUSTOMER ON RESPONSE ONLY RETROFIT" + +response.code(), Toast.LENGTH_SHORT).show();
             }
 
-
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
+                Log.d(TAG, "onResponse: logoutToServer onFailure" + t.toString());
                 Toast.makeText(CustomerMainActivity.this, "CUSTOMER FAILURE RETROFIT " + t.getMessage().toString() + t.getCause() + t.toString(), Toast.LENGTH_SHORT).show();
             }
-
-
         });
     }
 
@@ -160,19 +146,16 @@ public class CustomerMainActivity extends AppCompatActivity implements Navigatio
         final DrawerLayout mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerLayout.closeDrawer(GravityCompat.START);
         menuItem = item;
-
-
         mDrawerLayout.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
+            @SuppressLint("LongLogTag")
             @Override
             public void onDrawerClosed(View drawerView) {
-
                 int id = menuItem.getItemId();
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                 if (id == R.id.nav_restaurant) {
                     Toast.makeText(CustomerMainActivity.this, "REST Customer", Toast.LENGTH_SHORT).show();
                     transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
                     transaction.replace(R.id.content_frame, new RestaurantListFragment()).commit();
-
                 } else if (id == R.id.nav_tray) {
                     if (Objects.equals(screen, "tray")) {
                         Toast.makeText(CustomerMainActivity.this, "TRAY Customer", Toast.LENGTH_SHORT).show();
@@ -180,46 +163,30 @@ public class CustomerMainActivity extends AppCompatActivity implements Navigatio
                         transaction.replace(R.id.content_frame, new TrayFragment()).commit();
                     } else {
                         transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
-
                         transaction.replace(R.id.content_frame, new TrayFragment()).commit();
                     }
-
-
                 } else if (id == R.id.nav_order) {
-
                     if (Objects.equals(screen, "order")) {
                         Toast.makeText(CustomerMainActivity.this, "ORDERS Customer", Toast.LENGTH_SHORT).show();
                         transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
-
                         transaction.replace(R.id.content_frame, new OrderFragment()).commit();
-                    } else{
+                    } else {
                         transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
-
                         transaction.replace(R.id.content_frame, new OrderFragment()).commit();
                     }
-
-
                 } else {
                     Toast.makeText(CustomerMainActivity.this, "LOGOUT Customer", Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "onDrawerClosed: logout clicked");
                     logoutToServer(sharedPref.getString("token", ""));
                     SharedPreferences.Editor editor = sharedPref.edit();
                     editor.remove("token");
                     editor.apply();
-
                     finishAffinity();
                     Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
                     startActivity(intent);
                 }
-
-
             }
         });
-
-
         return false;
-
-
     }
-
-
 }

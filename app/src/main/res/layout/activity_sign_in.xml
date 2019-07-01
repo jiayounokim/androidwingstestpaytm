@@ -61,49 +61,19 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <LinearLayout
-        android:id="@+id/linearLayout"
-        android:layout_width="0dp"
-        android:layout_height="30dp"
-        android:layout_marginBottom="25dp"
-        android:layout_marginEnd="15dp"
-        android:layout_marginStart="15dp"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toTopOf="@+id/button_login"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <Button
-            android:id="@+id/button_customer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@color/colorAccent"
-            android:text="Customer"
-            android:textAllCaps="false"
-            android:textColor="@android:color/white"
-            android:textSize="12sp" />
-
-        <Button
-            android:id="@+id/button_driver"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@android:color/white"
-            android:text="Driver"
-            android:textAllCaps="false"
-            android:textColor="@color/colorAccent"
-            android:textSize="12sp" />
-    </LinearLayout>
-
-    <ImageView
-        android:id="@+id/imageView"
+    <Button
+        android:id="@+id/buttonSkip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="25dp"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="8dp"
+        android:background="@color/colorPayTMButton"
+        android:text="Skip"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/splash_screen" />
+        app:layout_constraintTop_toBottomOf="@+id/textView3" />
 
 </android.support.constraint.ConstraintLayout>

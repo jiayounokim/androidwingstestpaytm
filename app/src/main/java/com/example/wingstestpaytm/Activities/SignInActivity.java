@@ -3,7 +3,6 @@ package com.example.wingstestpaytm.Activities;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -36,85 +35,53 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class SignInActivity extends AppCompatActivity {
-
-    private static final String TAG = "SignInActivity";
-
-    private Button customerButton, driverButton;
+    public static boolean BUTTON_SKIPPED = false;
     private CallbackManager callbackManager;
-
     private SharedPreferences sharedPref;
     private Button buttonLogin;
+    private static final String TAG = "lgx_SignInActivity";
+    private Button buttonSkip;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
-
-        customerButton = findViewById(R.id.button_customer);
-        driverButton = findViewById(R.id.button_driver);
-
-        customerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                customerButton.setBackgroundColor(getResources().getColor(R.color.colorAccent));
-                customerButton.setTextColor(getResources().getColor(android.R.color.white));
-
-                driverButton.setBackgroundColor(getResources().getColor(android.R.color.white));
-                driverButton.setTextColor(getResources().getColor(R.color.colorAccent));
-            }
-        });
-
-        driverButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                driverButton.setBackgroundColor(getResources().getColor(R.color.colorAccent));
-                driverButton.setTextColor(getResources().getColor(android.R.color.white));
-
-                customerButton.setBackgroundColor(getResources().getColor(android.R.color.white));
-                customerButton.setTextColor(getResources().getColor(R.color.colorAccent));
-            }
-        });
-
+        buttonSkip = findViewById(R.id.buttonSkip);
         buttonLogin = findViewById(R.id.button_login);
+        sharedPref = getSharedPreferences("MY_KEY", Context.MODE_PRIVATE);
+        buttonSkip.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BUTTON_SKIPPED = true;
+                Intent intent = new Intent(getApplicationContext(), CustomerMainActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
         buttonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                BUTTON_SKIPPED = false;
                 if (AccessToken.getCurrentAccessToken() == null) {
                     LoginManager.getInstance().logInWithReadPermissions(SignInActivity.this, Arrays.asList("public_profile", "email"));
-
+                    Log.d(TAG, "onClick: NULL AccessToken.getCurrentAccessToken " + AccessToken.getCurrentAccessToken());
                 } else {
-                    ColorDrawable customerbuttonColor = (ColorDrawable) customerButton.getBackground();
-                    if (customerbuttonColor.getColor() == getResources().getColor(R.color.colorAccent)) {
-
-                        loginToServer(AccessToken.getCurrentAccessToken().getToken(), "customer");
-
-
-                    } else {
-
-                        loginToServer(AccessToken.getCurrentAccessToken().getToken(), "driver");
-
-                    }
+                    Log.d(TAG, "onClick: AccessToken.getCurrentAccessToken " + AccessToken.getCurrentAccessToken());
+                    loginToServer(AccessToken.getCurrentAccessToken().getToken(), "customer");
+                    Log.d(TAG, "onClick: " + AccessToken.getCurrentAccessToken().getToken());
                 }
             }
         });
-
-
         callbackManager = CallbackManager.Factory.create();
         sharedPref = getSharedPreferences("MY_KEY", Context.MODE_PRIVATE);
-
-
         final Button buttonLogout = findViewById(R.id.button_logout);
-
         buttonLogout.setVisibility(View.GONE);
-
-
         LoginManager.getInstance().registerCallback(callbackManager,
                 new FacebookCallback<LoginResult>() {
                     @Override
                     public void onSuccess(LoginResult loginResult) {
                         // App code
-                        Log.d("FACEBOOK TOKEN", loginResult.getAccessToken().getToken());
+                        Log.d(TAG, loginResult.getAccessToken().getToken());
                         GraphRequest request = GraphRequest.newMeRequest(
                                 loginResult.getAccessToken(),
                                 new GraphRequest.GraphJSONObjectCallback() {
@@ -124,19 +91,14 @@ public class SignInActivity extends AppCompatActivity {
                                             GraphResponse response) {
                                         // Application code
                                         Log.d("FACEBOOK DETAILS", object.toString());
-
-
                                         SharedPreferences.Editor editor = sharedPref.edit();
-
                                         try {
                                             editor.putString("name", object.getString("name"));
                                             editor.putString("email", object.getString("email"));
                                             editor.putString("avatar", object.getJSONObject("picture").getJSONObject("data").getString("url"));
                                         } catch (JSONException e) {
                                             e.printStackTrace();
-
                                         }
-
                                         editor.commit();
                                     }
                                 });
@@ -144,20 +106,7 @@ public class SignInActivity extends AppCompatActivity {
                         parameters.putString("fields", "id,name,email,picture");
                         request.setParameters(parameters);
                         request.executeAsync();
-
-
-                        ColorDrawable customerbuttonColor = (ColorDrawable) customerButton.getBackground();
-                        if (customerbuttonColor.getColor() == getResources().getColor(R.color.colorAccent)) {
-
-                            loginToServer(AccessToken.getCurrentAccessToken().getToken(), "customer");
-
-
-                        } else {
-
-                            loginToServer(AccessToken.getCurrentAccessToken().getToken(), "driver");
-
-                        }
-
+                        loginToServer(AccessToken.getCurrentAccessToken().getToken(), "customer");
                     }
 
                     @Override
@@ -170,28 +119,20 @@ public class SignInActivity extends AppCompatActivity {
                         // App code
                     }
                 });
-
         if (AccessToken.getCurrentAccessToken() != null) {
-
             Log.d("USER", sharedPref.getAll().toString());
             buttonLogin.setText("Continue as " + sharedPref.getString("email", ""));
             buttonLogout.setVisibility(View.VISIBLE);
-
         }
-
-
         buttonLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 LoginManager.getInstance().logOut();
                 buttonLogin.setText("Login with Facebook");
                 buttonLogout.setVisibility(View.GONE);
-
             }
         });
-
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -200,11 +141,10 @@ public class SignInActivity extends AppCompatActivity {
     }
 
     private void loginToServer(String facebookAccessToken, final String userType) {
-
+        Log.d(TAG, "loginToServer: facebookAccessToken " + facebookAccessToken);
         buttonLogin.setText("LOADING...");
         buttonLogin.setClickable(false);
         buttonLogin.setBackgroundColor(getResources().getColor(R.color.colorLightGray));
-
         ApiService service = ApiServiceBuilder.getService();
         JSONObject jsonObject = new JSONObject();
         try {
@@ -214,41 +154,30 @@ public class SignInActivity extends AppCompatActivity {
             jsonObject.put("backend", "facebook");
             jsonObject.put("token", facebookAccessToken);
             jsonObject.put("user_type", userType);
-
             Log.d("Token Object", jsonObject.toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), jsonObject.toString());
-
         Call<ResponseBodyLogin> call = service.facebookLogin(requestBody);
         call.enqueue(new Callback<ResponseBodyLogin>() {
             @Override
             public void onResponse(Call<ResponseBodyLogin> call, Response<ResponseBodyLogin> response) {
-                Log.d("Token Object", response.toString());
+                Log.d(TAG, response.toString());
                 ResponseBodyLogin responseBodyLogin = response.body();
-
+                Log.d(TAG, "onResponse: response.body() " + responseBodyLogin);
                 SharedPreferences.Editor editor = sharedPref.edit();
-
                 try {
-
                     editor.putString("token", responseBodyLogin.getAccessToken());
-                    Log.d("loghere", "onResponse: accesstoken from response body login " + responseBodyLogin.getAccessToken());
-
+                    Log.d(TAG, "onResponse: accesstoken from response body login " + responseBodyLogin.getAccessToken());
                 } catch (Exception e) {
-
                     e.printStackTrace();
-
                 }
-
                 editor.commit();
-
                 if (userType.equals("customer")) {
-
                     Intent intent = new Intent(getApplicationContext(), CustomerMainActivity.class);
                     startActivity(intent);
                 } else {
-
                     Intent intent = new Intent(getApplicationContext(), DriverMainActivity.class);
                     startActivity(intent);
                 }
@@ -259,7 +188,5 @@ public class SignInActivity extends AppCompatActivity {
                 Toast.makeText(SignInActivity.this, "Sorry! Somme Error Occured" + t.toString(), Toast.LENGTH_LONG).show();
             }
         });
-
-
     }
 }
