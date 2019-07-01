@@ -35,7 +35,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class SignInActivity extends AppCompatActivity {
-    public static boolean BUTTON_SKIPPED = false;
+    public static boolean BUTTON_SKIPPED;
     private CallbackManager callbackManager;
     private SharedPreferences sharedPref;
     private Button buttonLogin;
@@ -45,6 +45,7 @@ public class SignInActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_sign_in);
         buttonSkip = findViewById(R.id.buttonSkip);
         buttonLogin = findViewById(R.id.button_login);
@@ -56,6 +57,7 @@ public class SignInActivity extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), CustomerMainActivity.class);
                 startActivity(intent);
                 finish();
+
             }
         });
         buttonLogin.setOnClickListener(new View.OnClickListener() {
@@ -141,6 +143,7 @@ public class SignInActivity extends AppCompatActivity {
     }
 
     private void loginToServer(String facebookAccessToken, final String userType) {
+        BUTTON_SKIPPED = false;
         Log.d(TAG, "loginToServer: facebookAccessToken " + facebookAccessToken);
         buttonLogin.setText("LOADING...");
         buttonLogin.setClickable(false);

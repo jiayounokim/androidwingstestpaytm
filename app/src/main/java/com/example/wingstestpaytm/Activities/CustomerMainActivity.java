@@ -69,29 +69,48 @@ public class CustomerMainActivity extends AppCompatActivity implements Navigatio
         intent = getIntent();
         screen = intent.getStringExtra("screen");
         Toast.makeText(this, "onStart " + screen, Toast.LENGTH_SHORT).show();
-        if (Objects.equals(screen, "tray")) {
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
-            transaction.replace(R.id.content_frame, new TrayFragment()).commit();
-        } else if (Objects.equals(screen, "order")) {
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
-            transaction.replace(R.id.content_frame, new OrderFragment()).commit();
+        if (BUTTON_SKIPPED) {
+            Log.d(TAG, "onCreate: BUTTON_SKIPPED IF --- " + BUTTON_SKIPPED);
+
+            Toast.makeText(this, "You need to login to access this page", Toast.LENGTH_SHORT).show();
+            if (Objects.equals(screen, "tray")) {
+                Toast.makeText(this, "Tray needs login", Toast.LENGTH_SHORT).show();
+            } else if (Objects.equals(screen, "order")) {
+                Toast.makeText(this, "Order needs login", Toast.LENGTH_SHORT).show();
+            } else {
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
+                transaction.replace(R.id.content_frame, new RestaurantListFragment()).commit();
+            }
+
         } else {
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
-            transaction.replace(R.id.content_frame, new RestaurantListFragment()).commit();
+            BUTTON_SKIPPED = false;
+            Log.d(TAG, "onCreate: BUTTON_SKIPPED ELSE--- " + BUTTON_SKIPPED);
+
+            if (Objects.equals(screen, "tray")) {
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
+                transaction.replace(R.id.content_frame, new TrayFragment()).commit();
+            } else if (Objects.equals(screen, "order")) {
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
+                transaction.replace(R.id.content_frame, new OrderFragment()).commit();
+            } else {
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
+                transaction.replace(R.id.content_frame, new RestaurantListFragment()).commit();
+            }
         }
         sharedPref = getSharedPreferences("MY_KEY", Context.MODE_PRIVATE);
         View header = navigationView.getHeaderView(0);
         customer_avatar = (ImageView) header.findViewById(R.id.customer_avatar);
         customer_name = header.findViewById(R.id.customer_name);
-        if (SignInActivity.BUTTON_SKIPPED) {
+        if (BUTTON_SKIPPED) {
             Log.d(TAG, "BUTTON SKIPPED");
             customer_name.setText("Guest name");
             customer_avatar.setBackgroundResource(R.drawable.button_tray);
-            BUTTON_SKIPPED = false;
         } else {
+            BUTTON_SKIPPED = false;
             Log.d(TAG, "BUTTON NOT SKIPPED");
             customer_name.setText(sharedPref.getString("name", ""));
             Picasso.with(this).load(sharedPref.getString("avatar", "")).transform(new CircleTransform()).into(customer_avatar);
@@ -118,6 +137,7 @@ public class CustomerMainActivity extends AppCompatActivity implements Navigatio
 
     @SuppressLint("LongLogTag")
     private void logoutToServer(final String token) {
+        BUTTON_SKIPPED = true;
         Log.d(TAG, "logoutToServer: inside logoutToServer " + token);
         ApiService service = ApiServiceBuilder.getService();
         Call<Void> call = service.getToken(token, getString(R.string.CLIENT_ID), getString(R.string.CLIENT_SECRET));
