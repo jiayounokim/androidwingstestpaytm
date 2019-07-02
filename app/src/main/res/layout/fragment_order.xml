@@ -25,7 +25,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/colorAccent"
-        android:text="ON THE WAY"
+        android:text="LOADING..."
         android:textColor="@android:color/white"
         android:textSize="18sp" />
 </LinearLayout>
